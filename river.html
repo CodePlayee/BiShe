@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>single artificial river</title>
+  </head>
+  <body>
+    <svg
+      width="960px"
+      height="600px"
+      version="1.1"
+      xmlns="http://www.w3.org/2000/svg"
+    ></svg>
+  </body>
+  <script src="./Lib/d3.v5.min.js"></script>
+  <script type="module">
+    // import Vue from "./Lib/vue.esm.browser.js";
+    import { GUI } from "./node_modules/dat.gui/build/dat.gui.module.js";
+    import { Point, recursiveSubdivision } from "./js/noisyEdge.js";
+    import { utils } from "./js/utils.js";
+
+    const seed = 4; //used to product random numbers
+    const randInt = utils.makeRandInt(seed); //
+
+    const width = window.innerWidth || 960;
+    const height = window.innerHeight || 600;
+
+    class Options {
+      constructor(
+        minLen = 10,
+        amplitude = 0.5,
+        x0 = 10,
+        y0 = height * 0.5,
+        x1 = width * 0.9,
+        y1 = height * 0.5,
+        x2 = width * 0.5,
+        y2 = 10,
+        x3 = width * 0.5,
+        y3 = height * 0.9
+      ) {
+        this.minLen = minLen;
+        this.amplitude = amplitude;
+        this.x0 = x0;
+        this.y0 = y0;
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+        this.x3 = x3;
+        this.y3 = y3;
+      }
+    }
+
+    const svg = d3.select("svg");
+    svg.append("g");
+    let pts = [];
+    const options = new Options();
+    options.refresh = () => optionChangeHandler(options); //重新生成
+    optionChangeHandler(options); //called to generate the initial path and pts
+
+    addGUI(options, optionChangeHandler);
+
+    function optionChangeHandler(options) {
+      const { minLen, amplitude, x0, y0, x1, y1, x2, y2, x3, y3 } = options;
+      const getVarlinePts = recursiveSubdivision(minLen, amplitude, randInt);
+      const startPt = new Point(x0, y0);
+      const endPt = new Point(x1, y1);
+      const topPt = new Point(x2, y2);
+      const bottomPt = new Point(x3, y3);
+
+      const ptsInVarline = getVarlinePts(startPt, endPt, topPt, bottomPt);
+      pts = [startPt, ...ptsInVarline];
+      //  validatePts(pts);
+      drawPath(pts);
+      drawPts(options);
+    }
+
+    function drawPts(options) {
+      const { x0, y0, x1, y1, x2, y2, x3, y3 } = options;
+      const startPt = new Point(x0, y0, "red");
+      const endPt = new Point(x1, y1, "red");
+      const topPt = new Point(x2, y2, "blue");
+      const bottomPt = new Point(x3, y3, "blue");
+
+      const lineEndPts = svg.selectAll(".lineEndPts").data([startPt, endPt]); //待连线的两端点
+      lineEndPts
+        .enter()
+        .append("circle")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 5)
+        .attr("class", "lineEndPts")
+        .style("fill", d => d.color || "red");
+
+      lineEndPts.attr("cx", d => d.x).attr("cy", d => d.y);
+
+      const crossPts = svg.selectAll(".crossPts").data([topPt, bottomPt]); //与连线交叉的两端点
+      crossPts
+        .enter()
+        .append("circle")
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("r", 5)
+        .attr("class", "crossPts")
+        .style("fill", d => d.color || "blue");
+
+      crossPts.attr("cx", d => d.x).attr("cy", d => d.y);
+    }
+
+    function drawPath(pts) {
+      const path = d3.path();
+      path.moveTo(pts[0].x, pts[0].y);
+      pts.forEach(ele => {
+        path.lineTo(ele.x, ele.y);
+      });
+
+      let pathGroup = svg.select("g");
+      let pathes = pathGroup.select("path");
+      if (pathes.size() <= 0) {
+        pathes = pathGroup
+          .append("path")
+          .style("stroke", "blue")
+          .style("fill", "none")
+          .attr("d", path);
+      } else {
+        pathes.attr("d", path);
+      }
+    }
+
+    function addGUI(options, optionChangeHandler) {
+      //    options.generate = optionChangeHandler;
+      const gui = new GUI();
+      gui
+        .add(options, "minLen", 2, 50, 2)
+        .onFinishChange(() => optionChangeHandler(options));
+      gui
+        .add(options, "amplitude", 0, 1, 0.1)
+        .onFinishChange(() => optionChangeHandler(options));
+      const f0 = gui.addFolder("Start Point");
+      f0.add(options, "x0")
+        .name("x")
+        .onFinishChange(() => optionChangeHandler(options));
+      f0.add(options, "y0")
+        .name("y")
+        .onFinishChange(() => optionChangeHandler(options));
+      const f1 = gui.addFolder("End Point");
+      f1.add(options, "x1")
+        .name("x")
+        .onFinishChange(() => optionChangeHandler(options));
+      f1.add(options, "y1")
+        .name("y")
+        .onFinishChange(() => optionChangeHandler(options));
+      const f2 = gui.addFolder("Top Point");
+      f2.add(options, "x2")
+        .name("x")
+        .onFinishChange(() => optionChangeHandler(options));
+      f2.add(options, "y2")
+        .name("y")
+        .onFinishChange(() => optionChangeHandler(options));
+      const f3 = gui.addFolder("Bottom Point");
+      f3.add(options, "x3")
+        .name("x")
+        .onFinishChange(() => optionChangeHandler(options));
+      f3.add(options, "y3")
+        .name("y")
+        .onFinishChange(() => optionChangeHandler(options));
+
+      gui.add(options, "refresh");
+    }
+
+    //检验生成的曲线是否满足要求(检验规则待定)
+    function validatePts(pts) {
+      if (!pts || !pts.length) return;
+      const len = pts.length;
+      let varlineLen = 0;
+      pts.reduce((acc, cur, idx) => {
+        varlineLen += utils.twoPointsDistance(pts[idx - 1], cur);
+        return varlineLen;
+      });
+
+      const straightLineLen = utils.twoPointsDistance(pts[0], pts[len - 1]);
+
+      console.log(varlineLen);
+      console.log(straightLineLen);
+      console.log(varlineLen / straightLineLen);
+    }
+  </script>
+</html>
