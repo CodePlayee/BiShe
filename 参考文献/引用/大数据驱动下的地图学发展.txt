@@ -1,0 +1,19 @@
+{Reference Type}: Journal Article
+{Title}: 大数据驱动下的地图学发展
+{Author}: 艾廷华
+{Author Address}: 武汉大学资源与环境科学学院,湖北武汉430079
+{ISBN/ISSN}: 1007-3817
+{Journal}: 测绘地理信息
+{Year}: 2016
+{Volume}: 41
+{Issue}: 2
+{Keywords}: 大数据
+{Keywords}: 地图学
+{Keywords}: 隐喻地图
+{Keywords}: 可视化挖掘
+{Abstract}: 地图作为地学研究的可视化工具和研究成果的传播载体,在空间大数据研究中发挥重要作用,通过尺度变换将空间大数据变＂小＂,通过视觉语言可视化将大数据特征直观展示,通过投影变换将大数据降维。在完成该工作中,空间大数据的新的技术特征将推动地图综合、地图可视化与地图投影的新发展。同时,在大数据驱动下,地图应用可拓宽到非空间数据的表达中,对泛在网络空间的网络行为、集合空间的语义信息可视化表达,产生赛博地图、隐喻地图等新的地图形式。
+{URL}: http://lib.cqvip.com/Qikan/Article/Detail?id=668486493
+{Database Provider}: 重庆维普资讯有限公司
+
+
+
